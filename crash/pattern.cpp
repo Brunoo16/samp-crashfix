@@ -6,20 +6,20 @@ Pattern::Pattern(HANDLE process, HMODULE module_handle)
 
 	GetModuleInformation(process, module_handle, &module_info, sizeof(MODULEINFO));
 
-	this->base = (DWORD)module_info.lpBaseOfDll;
+	this->base = reinterpret_cast<DWORD>(module_info.lpBaseOfDll);
 	this->size = module_info.SizeOfImage;
 }
 
 DWORD Pattern::FindPattern(char *pattern, char *mask)
 {
-	DWORD patternLength = (DWORD)strlen(mask);
+	DWORD patternLength = static_cast<DWORD>(strlen(mask));
 
 	for (DWORD i = 0; i < this->size - patternLength; i++)
 	{
 		bool found = true;
 		for (DWORD j = 0; j < patternLength; j++)
 		{
-			found &= mask[j] == '?' || pattern[j] == *(char*)(this->base + i + j);
+			found &= mask[j] == '?' || pattern[j] == *reinterpret_cast<char*>((this->base + i + j));
 		}
 
 		if (found)
